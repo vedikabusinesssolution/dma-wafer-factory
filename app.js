@@ -37,18 +37,9 @@ function isAuthenticated(req,res,next){
     res.redirect('/login');
 }
 
-// Redirect root
-app.get('/', (req,res) => {
-    if(req.session && req.session.user){
-        res.redirect('/p'); // logged in → process timeline
-    } else {
-        res.redirect('/login'); // not logged in → login page
-    }
-});
-
 // Routes
-app.use('/', authRoutes);          // login/logout
-app.use('/p', isAuthenticated, processRoutes); // all process routes under /p
+app.use('/', authRoutes);          // login, logout
+app.use('/dashboard', isAuthenticated, processRoutes);  // Dashboard + Process routes
 
 // Start server
 const PORT = 3000;
