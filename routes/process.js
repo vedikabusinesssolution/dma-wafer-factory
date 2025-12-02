@@ -52,11 +52,11 @@ router.post("/submit", (req,res) => {
     // Redirect to next incomplete process or dashboard
     const nextProcess = processes.find(p => !completedProcesses.includes(p.id.toString()));
     if(nextProcess) return res.redirect(`/dashboard/process/${nextProcess.id}`);
-    res.redirect("/dashboard/final-report");
+    res.redirect("/dashboard/final_report");
 });
 
 // Final report page
-router.get("/final-report", (req,res) => {
+router.get("/final_report", (req,res) => {
     const results = [];
 
     completedProcesses.forEach(pid => {
