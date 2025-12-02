@@ -5,7 +5,7 @@ const router = express.Router();
 const user = { username: "admin", password: "admin" };
 
 // Login page
-router.get('/login', (req,res) => {
+router.get('/', (req,res) => {
     res.render('login', { error: null });
 });
 
