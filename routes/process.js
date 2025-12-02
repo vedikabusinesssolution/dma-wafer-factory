@@ -92,7 +92,7 @@ router.get("/final-report", (req,res) => {
         });
     });
 
-    res.render("final_report", { results });
+    res.render("dma_report", { results });
 });
 
 // Download PDF
