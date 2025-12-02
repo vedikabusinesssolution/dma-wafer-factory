@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const questions = require("../questions");
-const pillars = require("../pillars");
+const questions = require("./questions");
+const pillars = require("./pillars");
 
 const processes = [
   { id: 1, name: "Raw Material" },
