@@ -1,0 +1,100 @@
+Frying Process – Form Questions
+1. Inputs
+
+Intake slice weight for this batch
+Type: Number (kg)
+
+Oil temperature at start
+Type: Number (°C)
+
+Oil level status
+Type: Dropdown (Low, OK, High)
+
+Fryer load per cycle
+Type: Number (kg)
+
+2. Process Details
+
+Frying time per batch
+Type: Number (seconds)
+
+Oil temperature during frying
+Type: Number (°C)
+
+Oil turnover frequency
+Type: Dropdown (Daily, Every shift, Weekly, No fixed schedule)
+
+Operator starting the cycle
+Type: Text
+
+Fryer control type
+Type: Dropdown (Manual, Semi automatic, Automatic)
+
+3. Outputs
+
+Final output weight
+Type: Number (kg)
+
+Batch moisture level (if measured)
+Type: Number (%)
+
+Reject quantity after frying
+Type: Number (kg)
+
+Final color grade
+Type: Dropdown (Light, Normal, Dark)
+
+4. Feedback Mechanisms
+
+Who checks the frying quality?
+Type: Dropdown (Operator, Supervisor, QA)
+
+When is temperature checked?
+Type: Dropdown (Continuous sensor, Interval checks, Manual only)
+
+Is oil quality monitored?
+Type: Dropdown (Yes sensor, Yes manual, No)
+
+What triggers correction during frying?
+Type: Dropdown (Color change, Texture change, Alarm, Operator judgment)
+
+5. Corrections / Interventions
+
+Temperature adjustments needed this batch?
+Type: Dropdown (Yes, No)
+
+Oil top-up needed?
+Type: Dropdown (Yes, No)
+
+Manual removal of defective chips?
+Type: Dropdown (Yes, No)
+
+Any downtime during frying?
+Type: Dropdown (Yes, No)
+If Yes: Enter reason
+Type: Text
+
+6. Data & Digital Points
+
+Is fryer temperature logged digitally?
+Type: Dropdown (Yes, No)
+
+Is frying time auto-logged?
+Type: Dropdown (Yes, No)
+
+Any existing sensors?
+Type: Multi select (Temperature, Oil level, Moisture, Vibration, None)
+
+How is batch data recorded?
+Type: Dropdown (Paper, Excel, Mobile app, Dashboard, Not recorded)
+
+7. Resource Use
+
+Oil consumption this batch
+Type: Number (liters)
+
+Energy reading for fryer
+Type: Number (kWh)
+
+Oil filtration cycle completed today?
+Type: Dropdown (Yes, No)

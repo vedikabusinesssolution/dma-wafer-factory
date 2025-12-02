@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DMA Stepper</title>
+    <link rel="stylesheet" href="/css/stepper.css">
+    <style>
+        body { font-family: Arial; margin:0; padding:0; }
+        .stepper-wrapper { display: flex; justify-content: space-between; padding: 15px; position: sticky; top:0; background:#f5f5f5; border-bottom:2px solid #ddd; z-index:100; }
+        .stepper-item { text-align:center; width:150px; }
+        .step-counter { width:30px; height:30px; border-radius:50%; background:lightgray; margin:0 auto; line-height:30px; font-weight:bold; }
+        .stepper-item.completed .step-counter { background:green; color:white; }
+        .step-name { margin-top:5px; }
+        .question-container { max-height:70vh; overflow-y:auto; padding:20px; margin:20px; border:1px solid #ccc; border-radius:8px; background:#fafafa; }
+        .question-block { margin-bottom:20px; }
+        label { display:block; font-weight:bold; margin-bottom:5px; }
+        input, select { width:100%; padding:8px; margin-bottom:10px; border-radius:4px; border:1px solid #ccc; }
+        button { padding:10px 20px; background:green; color:white; border:none; cursor:pointer; border-radius:4px; }
+        button:hover { background:darkgreen; }
+    </style>
+</head>
+<body>
+
+<header style="display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#f5f5f5; border-bottom:2px solid #ddd;">
+    <h2>DMA Process Timeline</h2>
+    <div style="text-align:right; margin:10px;">
+        {{user}} | <a href="/logout">Logout</a>
+    </div>
+
+</header>
+
+<div class="stepper-wrapper">
+    {{#each processes}}
+    <div class="stepper-item {{#if (includes ../completedProcesses this.id)}}completed{{/if}}">
+        <div class="step-counter">
+            {{#if (includes ../completedProcesses this.id)}}✓{{else}}{{inc @index}}{{/if}}
+        </div>
+        <div class="step-name">{{this.name}}</div>
+    </div>
+    {{/each}}
+</div>
+
+{{#if selectedProcess}}
+<div class="question-container">
+    <h2>{{selectedProcess.name}} Questionnaire</h2>
+
+    <form action="/p/submit" method="POST">
+        <input type="hidden" name="process_id" value="{{selectedProcess.id}}">
+
+        {{#each questions}}
+        <div class="question-block">
+            <label>{{this.q}}</label>
+            {{#if (eq this.type "number")}}
+                <input type="number" name="{{this.key}}" required>
+            {{else if (eq this.type "dropdown")}}
+                <select name="{{this.key}}" required>
+                    {{#each this.options}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+            {{else if (eq this.type "yesno")}}
+                <select name="{{this.key}}" required>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            {{/if}}
+        </div>
+        {{/each}}
+
+        <button type="submit">Save & Next →</button>
+    </form>
+</div>
+{{/if}}
+
+<!-- Handlebars helper for eq -->
+<script>
+    Handlebars.registerHelper('eq', function(a,b) { return a===b; });
+</script>
+
+</body>
+</html>

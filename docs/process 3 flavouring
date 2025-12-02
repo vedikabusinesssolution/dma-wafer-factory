@@ -1,0 +1,71 @@
+Inputs
+
+Output weight from frying
+Type: Number (kg)
+
+Seasoning type
+Type: Dropdown (Masala, Salt, Cheese, Custom)
+
+Seasoning batch weight
+Type: Number (kg)
+
+Oil spray quantity
+Type: Number (ml)
+
+Process Details
+
+Seasoning drum speed
+Type: Number (rpm)
+
+Mixing time
+Type: Number (seconds)
+
+Operator name
+Type: Text
+
+Flavoring method
+Type: Dropdown (Manual, Semi automatic, Automatic)
+
+Outputs
+
+Final flavored chips weight
+Type: Number (kg)
+
+Reject quantity
+Type: Number (kg)
+
+Flavor coverage consistency
+Type: Dropdown (Low, Medium, High)
+
+Feedback
+
+Sample taste test done?
+Type: Dropdown (Yes, No)
+
+Uniformity check method
+Type: Dropdown (Visual, Weighing, Auto sensor)
+
+Any alerts or issues
+Type: Text
+
+Corrections
+
+Added extra seasoning?
+Type: Dropdown (Yes, No)
+
+Adjusted drum speed?
+Type: Dropdown (Yes, No)
+
+Reprocessed batch?
+Type: Dropdown (Yes, No)
+
+Data Points
+
+Is drum speed logged?
+Type: Dropdown (Yes, No)
+
+Is seasoning usage recorded digitally?
+Type: Dropdown (Yes, No)
+
+Flavoring data entry method
+Type: Dropdown (Paper, Excel, App, Dashboard)

@@ -1,0 +1,120 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    padding: 40px;
+}
+
+.heading {
+    text-align: center;
+    margin-bottom: 40px;
+    position: sticky;
+}
+
+.stepper-wrapper {
+    display: flex;
+    justify-content: space-between;
+    background-color: #f5f5f5;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid #ddd;
+}
+
+.stepper-item {
+    text-align: center;
+    width: 25%;
+    position: relative;
+}
+
+.stepper-item::before, .stepper-item::after {
+    content: "";
+    position: absolute;
+    top: 25px;
+    border-bottom: 2px solid #ddd;
+    width: 100%;
+    z-index: -1;
+}
+
+.stepper-item::before { left: -50%; }
+.stepper-item::after { right: -50%; }
+
+.stepper-item:first-child::before,
+.stepper-item:last-child::after {
+    content: none;
+}
+
+.step-counter {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #0320fb;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+}
+
+.stepper-item.completed .step-counter {
+    background: #28a745;
+    color: white;
+    font-weight: bold;
+}
+
+.start-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 15px;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.completed-text {
+    color: #28a745;
+    font-weight: bold;
+    margin-top: 8px;
+    display: block;
+}
+.question-container {
+            max-height: 70vh; /* height of scrollable area */
+            overflow-y: auto;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+}
+
+.question-block {
+            margin-bottom: 20px;
+}
+
+label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+}
+
+input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+}
+
+button {
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+}
+
+button:hover {
+            background-color: darkgreen;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DMA Process</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+    <h1>DMA Process</h1>
+</header>
+
+<div class="timeline-container">
+    <ul class="timeline">
+        {{#each processes}}
+        <li class="{{#if completed}}completed{{/if}} {{#if active}}active{{/if}}">
+            <span class="circle"></span>
+            <span>{{this.name}}</span>
+        </li>
+        {{/each}}
+    </ul>
+</div>
+
+<div class="content">
+    {{{body}}}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{process.name}} Questions</title>
+</head>
+<body>
+
+<h2>{{process.name}} Questionnaire</h2>
+
+<form action="/submit" method="POST">
+    <input type="hidden" name="process_id" value="{{process.id}}">
+
+    {{#each questions}}
+        <label>{{this.question}}</label><br>
+        <input type="text" name="{{this.key}}" required><br><br>
+    {{/each}}
+
+    <button type="submit">Save & Next →</button>
+</form>
+
+</body>
+</html>

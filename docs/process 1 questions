@@ -1,0 +1,33 @@
+Are sorting & washing machines automated? – Dropdown (Manual / Semi / Fully)
+
+Are parameters like washing time, water flow adjusted manually? – Dropdown (Always / Sometimes / Never)
+
+Is batch data recorded digitally? – Yes/No
+
+Are batch IDs linked with process data? – Yes/No
+
+Who enters/verifies batch data? – Dropdown (Operator / Supervisor / Automated)
+
+How often is batch data reviewed or shared? – Dropdown (Daily / Weekly / Monthly)
+
+Are quality checks performed in real time? – Yes/No
+
+What defines “good” quality? – Text / MCQ
+
+How are defects corrected? – Text / MCQ
+
+Are machines connected to a central system? – Yes/No
+
+Are alarms or alerts automatic? – Yes/No
+
+Are operators trained on digital tools? – Yes/No
+
+Do operators rely on data for decisions? – Dropdown (Never / Sometimes / Always)
+
+Is water usage monitored digitally? – Number (Liters / Cycle)
+
+Is energy consumption monitored digitally? – Number (kWh / Day)
+
+Are waste and rejects tracked digitally? – Yes/No
+
+Are thresholds set for water, energy, or waste consumption? – Yes/No

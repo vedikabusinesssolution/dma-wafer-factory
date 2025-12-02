@@ -1,0 +1,57 @@
+Quality Checks
+
+Sample frequency
+Type: Dropdown (Every batch, Every hour, Random)
+
+Chips color rating
+Type: Dropdown (Light, Normal, Dark)
+
+Crispness test result
+Type: Dropdown (OK, Low, High)
+
+Oil quality reading
+Type: Number (TPM percent if available)
+
+Defect Tracking
+
+Defect type
+Type: Multi select (Burnt, Underfried, Broken, Oiliness, Other)
+
+Defect count this batch
+Type: Number
+
+Actions taken
+Type: Text
+
+Maintenance
+
+Any machine issue today?
+Type: Dropdown (Yes, No)
+
+If yes, issue description
+Type: Text
+
+Downtime duration
+Type: Number (minutes)
+
+Who fixed it?
+Type: Dropdown (Operator, In-house technician, External technician)
+
+Preventive Maintenance
+
+Was PM performed this week?
+Type: Dropdown (Yes, No)
+
+PM logged location
+Type: Dropdown (Paper, Excel, System)
+
+Data Points
+
+Quality results logged digitally?
+Type: Dropdown (Yes, No)
+
+Maintenance logs stored in
+Type: Dropdown (Paper, Excel, App, Dashboard)
+
+Any unused data observed?
+Type: Text

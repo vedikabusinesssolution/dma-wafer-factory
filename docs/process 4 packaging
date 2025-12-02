@@ -1,0 +1,71 @@
+Inputs
+
+Flavored chips weight received
+Type: Number (kg)
+
+Packaging material type
+Type: Dropdown (Poly, Matte, Foil, Other)
+
+Bag size
+Type: Dropdown (10g, 20g, 50g, 100g, Custom)
+
+Process Details
+
+Machine type
+Type: Dropdown (Manual, Semi automatic, Automatic)
+
+Machine speed
+Type: Number (packs per minute)
+
+Seal temperature
+Type: Number (°C)
+
+Operator name
+Type: Text
+
+Outputs
+
+Total packed units
+Type: Number
+
+Underweight packs
+Type: Number
+
+Overweight packs
+Type: Number
+
+Seal failure count
+Type: Number
+
+Feedback
+
+Weight check method
+Type: Dropdown (Random check, 100 percent check, Auto check)
+
+Seal quality inspection
+Type: Dropdown (Visual, Manual pull test, Auto sensor)
+
+Any machine alarm raised?
+Type: Dropdown (Yes, No)
+
+Corrections
+
+Weight adjustment needed?
+Type: Dropdown (Yes, No)
+
+Seal temperature changed?
+Type: Dropdown (Yes, No)
+
+Machine stop events
+Type: Text
+
+Data Points
+
+Are machine counters auto-logged?
+Type: Dropdown (Yes, No)
+
+Is packaging waste recorded?
+Type: Dropdown (Yes, No)
+
+Packaging logs stored in
+Type: Dropdown (Paper, Excel, App, Dashboard)
