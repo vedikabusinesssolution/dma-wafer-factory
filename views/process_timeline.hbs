@@ -43,7 +43,7 @@
 <div class="question-container">
     <h2>{{selectedProcess.name}} Questionnaire</h2>
 
-    <form action="/p/submit" method="POST">
+    <form action="/dashboard/submit" method="POST">
         <input type="hidden" name="process_id" value="{{selectedProcess.id}}">
 
         {{#each questions}}
