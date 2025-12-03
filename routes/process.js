@@ -99,14 +99,19 @@ router.get("/dma_report",(req,res)=>{
 // ============================
 // FINAL (AVERAGE) REPORT PAGE
 // ============================
-router.get("/final_report",(req,res)=>{
-
+router.get("/final_report", (req, res) => {
     const avgTable = buildAveragePillars();
 
-    res.render("final_report",{
-        avgTable
+    res.render("final_report", {
+        intro: "DMA evaluation of all manufacturing processes based on questionnaire responses.",
+        methodology: "Each pillar score is calculated per process and then averaged on a 0–5 scale.",
+        pillarScores: avgTable.map(item => ({
+            pillar: item.pillar,
+            avg_score: item.average
+        }))
     });
 });
+
 
 
 
