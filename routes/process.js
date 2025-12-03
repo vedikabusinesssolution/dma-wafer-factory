@@ -17,15 +17,29 @@ const processes = [
 let completedProcesses = [];
 let allAnswers = {};
 
+function getSessionData(req) {
+    if (!req.session.dma) {
+        req.session.dma = {
+            completedProcesses: [],
+            allAnswers: {}
+        };
+    }
+    return req.session.dma;
+}
+
+
 
 // ============================
 // DASHBOARD
 // ============================
-router.get("/", (req,res)=>{
-    res.render("dashboard",{
+router.get("/", (req,res) => {
+
+    const dma = getSessionData(req);
+
+    res.render("dashboard", {
         user: req.session.user,
         processes,
-        completedProcesses
+        completedProcesses: dma.completedProcesses
     });
 });
 
