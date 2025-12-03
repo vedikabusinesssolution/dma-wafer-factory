@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
+
 const questions = require("./questions");
 const pillars = require("./pillars");
 
-const PDFDocument = require("pdfkit");
-
+// DMA processes
 const processes = [
   { id: 1, name: "Raw Material" },
   { id: 2, name: "Frying" },
@@ -13,255 +13,148 @@ const processes = [
   { id: 5, name: "Quality & Maintenance" }
 ];
 
-// MEMORY STORES (can be replaced with DB later)
-let completedProcesses = [];
-let allAnswers = {};
+// ✅ initialize session storage
+function getSessionData(req) {
+    if (!req.session.dma) {
+        req.session.dma = {
+            completedProcesses: [],
+            allAnswers: {}
+        };
+    }
+    return req.session.dma;
+}
 
+// --------------------------------------
+// DASHBOARD PAGE
+// --------------------------------------
 
-// ============================
-// DASHBOARD
-// ============================
-router.get("/", (req,res)=>{
-    res.render("dashboard",{
+router.get("/", (req,res) => {
+
+    const dma = getSessionData(req);
+
+    res.render("dashboard", {
         user: req.session.user,
         processes,
-        completedProcesses
+        completedProcesses: dma.completedProcesses
     });
 });
 
+// --------------------------------------
+// LOAD QUESTIONNAIRE FOR PROCESS
+// --------------------------------------
 
-// ============================
-// LOAD QUESTIONNAIRE
-// ============================
-router.get("/process/:id",(req,res)=>{
-    const pid = req.params.id;
-    const process = processes.find(p=>p.id==pid);
+router.get("/process/:id", (req,res) => {
 
-    if(!process) return res.send("Invalid process!");
+    const process_id = req.params.id;
+    const dma = getSessionData(req);
 
-    const qArr = questions[pid] || [];
+    const process = processes.find(p => p.id == process_id);
+    if(!process) return res.send("Invalid process");
 
-    res.render("process_timeline",{
+    const qArr = questions[process.id] || [];
+
+    res.render("process_timeline", {
         processes,
-        completedProcesses,
+        completedProcesses: dma.completedProcesses,
         selectedProcess: process,
         questions: qArr
-    })
+    });
 });
 
-
-// ============================
+// --------------------------------------
 // SUBMIT PROCESS ANSWERS
-// ============================
-router.post("/submit",(req,res)=>{
-    const pid = req.body.process_id;
-    if(!pid) return res.send("process_id missing");
+// --------------------------------------
 
-    // Save answers
-    allAnswers[pid] = req.body;
+router.post("/submit", (req,res) =>{
 
-    // Mark completed
-    if(!completedProcesses.includes(pid.toString()))
-        completedProcesses.push(pid.toString());
+    const dma = getSessionData(req);
+    const process_id = req.body.process_id;
 
-    // Find next process
-    const next = processes.find(
-        p => !completedProcesses.includes(p.id.toString())
-    );
+    if(!process_id) return res.send("process_id missing");
 
-    // Route steps
-    if(next){
-        return res.redirect(`/dashboard/process/${next.id}`)
+    // save answers
+    dma.allAnswers[process_id] = req.body;
+
+    // mark process complete ✅
+    if(!dma.completedProcesses.includes(process_id)){
+        dma.completedProcesses.push(process_id.toString());
     }
 
-    // ✅ ALL DONE -> GO TO DMA PROCESSWISE REPORT
-    return res.redirect("/dashboard/dma_report")
+    // find next incomplete process
+    const nextProcess = processes.find(
+        p => !dma.completedProcesses.includes(p.id.toString())
+    );
+
+    if(nextProcess) {
+        return res.redirect(`/dashboard/process/${nextProcess.id}`);
+    }
+
+    // finished → report
+    res.redirect("/dashboard/final_report");
 });
 
+// --------------------------------------
+// FINAL DMA REPORT
+// --------------------------------------
 
+router.get("/final_report", (req,res)=>{
 
+    const dma = getSessionData(req);
 
-// ============================
-// PROCESSWISE DMA REPORT
-// ============================
-router.get("/dma_report",(req,res)=>{
-
-    const results = buildProcessResults();
-
-    res.render("dma_report",{
-        results
-    });
-});
-
-
-
-
-// ============================
-// FINAL (AVERAGE) REPORT PAGE
-// ============================
-router.get("/final_report", (req, res) => {
-    const avgTable = buildAveragePillars();
-
-    res.render("final_report", {
-        intro: "DMA evaluation of all manufacturing processes based on questionnaire responses.",
-        methodology: "Each pillar score is calculated per process and then averaged on a 0–5 scale.",
-        pillarScores: avgTable.map(item => ({
-            pillar: item.pillar,
-            avg_score: item.average
-        }))
-    });
-});
-
-
-
-
-
-// ============================
-// DOWNLOAD FINAL PDF
-// ============================
-router.get("/download-final-report",(req,res)=>{
-
-    const averages = buildAveragePillars();
-
-    const doc = new PDFDocument({size:"A4", margin:40});
-
-    res.setHeader("Content-Disposition","attachment; filename=DMA_Final_Report.pdf");
-    res.setHeader("Content-Type","application/pdf");
-
-    doc.pipe(res);
-
-    doc.fontSize(18).text("DMA FINAL REPORT",{align:"center"});
-    doc.moveDown();
-
-    doc.fontSize(12).text("Introduction:");
-    doc.text("This DMA report summarizes the evaluation scores across all manufacturing processes.");
-    doc.moveDown();
-
-    doc.text("Methodology:");
-    doc.text("Scores were calculated pillar-wise on a 0–5 scale across process questionnaires and averaged.");
-
-    doc.moveDown();
-    doc.text("Scale -------- 0 (Poor)   TO   5 (Excellent)");
-    doc.moveDown(2);
-
-
-    doc.fontSize(13).text("Pillar Average Scores:");
-    doc.moveDown();
-
-    averages.forEach(r=>{
-        doc.text(`${r.pillar} :  ${r.average} / 5`);
-    });
-
-    doc.end();
-
-});
-
-
-
-
-// ==================================================
-// ================== UTIL FUNCTIONS =================
-// ==================================================
-
-
-function buildProcessResults(){
+    const completedProcesses = dma.completedProcesses;
+    const answers = dma.allAnswers;
 
     const results = [];
 
-    completedProcesses.forEach(pid=>{
+    completedProcesses.forEach(pid => {
 
-        const answers = allAnswers[pid];
-        const map = pillars[pid];
+        const processPillars = pillars[pid] || {};
+        const processScore = [];
+        
+        for (let p in processPillars) {
 
-        const scores = [];
+            const keys = processPillars[p];
+            if(!keys.length) continue;
 
-        for(const pillar in map){
+            let positive = 0;
+            const observations = [];
 
-            const keys = map[pillar];
-            let positive=0;
-            const obs=[];
+            keys.forEach(k => {
+                const val = answers[pid][k];
+                if(!val) return;
 
-            keys.forEach(k=>{
-                const ans = answers[k];
-                if(!ans) return;
+                observations.push(`${k}: ${val}`);
 
-                obs.push(`${k} : ${ans}`);
-
-                if(ans.toLowerCase && ans.toLowerCase()=="yes") positive++;
-                else if(!isNaN(ans)) positive++;
-                else positive+=0.5;
+                if(val.toLowerCase && val.toLowerCase() === "yes") positive++;
+                else if(!isNaN(val)) positive++;
+                else if(["always","excel","erp","digital","panel display"].includes(val.toLowerCase())) positive++;
+                else positive += 0.5;
             });
 
-            const score = keys.length
-                ? Math.round((positive/keys.length)*5)
-                : 0;
-
-            scores.push({pillar,score,observations:obs});
+            const score = Math.round((positive / keys.length) * 5);
+            processScore.push({pillar:p, score, observations});
         }
 
         results.push({
-            process_name: processes.find(p=>p.id==pid).name,
-            pillars:scores
-        })
+            process_name: processes.find(p => p.id == pid).name,
+            pillars: processScore
+        });
+    });
 
-    })
+    res.render("dma_report", { results });
+});
 
-    return results;
-}
+// --------------------------------------
+// RESET DMA & START AGAIN
+// --------------------------------------
 
+router.get("/restart", (req,res) => {
+    req.session.dma = {
+        completedProcesses: [],
+        allAnswers: {}
+    };
 
-function buildAveragePillars(){
-
-    const base = [
-        "Process Automation",
-        "Data Management",
-        "Quality Monitoring",
-        "Equipment Integration",
-        "Workforce Skill",
-        "Sustainability"
-    ];
-
-    const table=[];
-
-    base.forEach(pillar=>{
-
-        let total = 0;
-        let count = 0;
-
-        completedProcesses.forEach(pid=>{
-
-            const answers = allAnswers[pid];
-            const keys = pillars[pid][pillar] || [];
-
-            if(!keys.length) return;
-
-            let pos=0;
-
-            keys.forEach(k=>{
-                const ans = answers[k];
-                if(!ans) return;
-
-                if(ans.toLowerCase && ans.toLowerCase()=="yes") pos++;
-                else if(!isNaN(ans)) pos++;
-                else pos+=0.5;
-            })
-
-            const score = Math.round((pos/keys.length)*5);
-
-            total+=score;
-            count++;
-
-        })
-
-        table.push({
-            pillar,
-            average: count ? (total/count).toFixed(2) : 0
-        })
-
-    })
-
-    return table;
-
-}
+    res.redirect("/dashboard/");
+});
 
 module.exports = router;
