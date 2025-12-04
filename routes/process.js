@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const questions = require("./questions");
 const pillars = require("./pillars");
-
 const PDFDocument = require("pdfkit");
 
 const processes = [
@@ -13,25 +12,23 @@ const processes = [
   { id: 5, name: "Quality & Maintenance" }
 ];
 
-// MEMORY STORES (can be replaced with DB later)
-let completedProcesses = [];
-let allAnswers = {};
+/* ============================
+   SESSION STORE
+=============================*/
 
 function getSessionData(req) {
     if (!req.session.dma) {
         req.session.dma = {
-            completedProcesses: [],
+            completedProcesses: [],   // ✅ EMPTY for new login
             allAnswers: {}
         };
     }
     return req.session.dma;
 }
 
-
-
-// ============================
-// DASHBOARD
-// ============================
+/* ============================
+        DASHBOARD
+=============================*/
 router.get("/", (req,res) => {
 
     const dma = getSessionData(req);
@@ -39,15 +36,19 @@ router.get("/", (req,res) => {
     res.render("dashboard", {
         user: req.session.user,
         processes,
-        completedProcesses: dma.completedProcesses
+        completedProcesses: dma.completedProcesses   // ✅ ONLY session data
     });
 });
 
 
-// ============================
-// LOAD QUESTIONNAIRE
-// ============================
+
+/* ============================
+     LOAD QUESTIONNAIRE
+=============================*/
 router.get("/process/:id",(req,res)=>{
+
+    const dma = getSessionData(req);
+
     const pid = req.params.id;
     const process = processes.find(p=>p.id==pid);
 
@@ -57,64 +58,71 @@ router.get("/process/:id",(req,res)=>{
 
     res.render("process_timeline",{
         processes,
-        completedProcesses,
+        completedProcesses: dma.completedProcesses,   // ✅ SESSION DATA
         selectedProcess: process,
         questions: qArr
-    })
+    });
 });
 
 
-// ============================
-// SUBMIT PROCESS ANSWERS
-// ============================
+
+/* ============================
+      SUBMIT PROCESS
+=============================*/
 router.post("/submit",(req,res)=>{
+
+    const dma = getSessionData(req);
+
     const pid = req.body.process_id;
     if(!pid) return res.send("process_id missing");
 
-    // Save answers
-    allAnswers[pid] = req.body;
+    // ✅ Save Answers
+    dma.allAnswers[pid] = req.body;
 
-    // Mark completed
-    if(!completedProcesses.includes(pid.toString()))
-        completedProcesses.push(pid.toString());
+    // ✅ Mark Process Completed
+    if (!dma.completedProcesses.includes(pid.toString()))
+        dma.completedProcesses.push(pid.toString());
 
-    // Find next process
+    // ✅ Find Next Uncompleted Process
     const next = processes.find(
-        p => !completedProcesses.includes(p.id.toString())
+        p => !dma.completedProcesses.includes(p.id.toString())
     );
 
-    // Route steps
+    // ✅ Move ahead
     if(next){
         return res.redirect(`/dashboard/process/${next.id}`)
     }
 
-    // ✅ ALL DONE -> GO TO DMA PROCESSWISE REPORT
+    // ✅ ALL DONE -> DMA REPORT
     return res.redirect("/dashboard/dma_report")
 });
 
 
 
 
-// ============================
-// PROCESSWISE DMA REPORT
-// ============================
+/* ============================
+    PROCESSWISE DMA REPORT
+=============================*/
 router.get("/dma_report",(req,res)=>{
 
-    const results = buildProcessResults();
+    const dma = getSessionData(req);
 
-    res.render("dma_report",{
-        results
-    });
+    const results = buildProcessResults(dma);
+
+    res.render("dma_report",{ results });
 });
 
 
 
 
-// ============================
-// FINAL (AVERAGE) REPORT PAGE
-// ============================
+/* ============================
+    FINAL AVG REPORT PAGE
+=============================*/
 router.get("/final_report", (req, res) => {
-    const avgTable = buildAveragePillars();
+
+    const dma = getSessionData(req);
+
+    const avgTable = buildAveragePillars(dma);
 
     res.render("final_report", {
         intro: "DMA evaluation of all manufacturing processes based on questionnaire responses.",
@@ -129,13 +137,14 @@ router.get("/final_report", (req, res) => {
 
 
 
-
-// ============================
-// DOWNLOAD FINAL PDF
-// ============================
+/* ============================
+      PDF DOWNLOAD
+=============================*/
 router.get("/download-final-report",(req,res)=>{
 
-    const averages = buildAveragePillars();
+    const dma = getSessionData(req);
+
+    const averages = buildAveragePillars(dma);
 
     const doc = new PDFDocument({size:"A4", margin:40});
 
@@ -152,39 +161,39 @@ router.get("/download-final-report",(req,res)=>{
     doc.moveDown();
 
     doc.text("Methodology:");
-    doc.text("Scores were calculated pillar-wise on a 0–5 scale across process questionnaires and averaged.");
+    doc.text("Scores were calculated pillar-wise on a 0–5 scale and averaged.");
 
     doc.moveDown();
     doc.text("Scale -------- 0 (Poor)   TO   5 (Excellent)");
     doc.moveDown(2);
 
-
     doc.fontSize(13).text("Pillar Average Scores:");
     doc.moveDown();
 
-    averages.forEach(r=>{
-        doc.text(`${r.pillar} :  ${r.average} / 5`);
+    averages.forEach(row=>{
+        doc.text(`${row.pillar} :  ${row.average} / 5`);
     });
 
     doc.end();
-
 });
 
 
 
 
-// ==================================================
-// ================== UTIL FUNCTIONS =================
-// ==================================================
 
 
-function buildProcessResults(){
+/* ==================================================
+      UTIL FUNCTIONS  (SESSION BASED)
+==================================================*/
+
+
+function buildProcessResults(dma){
 
     const results = [];
 
-    completedProcesses.forEach(pid=>{
+    dma.completedProcesses.forEach(pid=>{
 
-        const answers = allAnswers[pid];
+        const answers = dma.allAnswers[pid];
         const map = pillars[pid];
 
         const scores = [];
@@ -216,15 +225,16 @@ function buildProcessResults(){
         results.push({
             process_name: processes.find(p=>p.id==pid).name,
             pillars:scores
-        })
+        });
 
-    })
+    });
 
     return results;
 }
 
 
-function buildAveragePillars(){
+
+function buildAveragePillars(dma){
 
     const base = [
         "Process Automation",
@@ -239,12 +249,12 @@ function buildAveragePillars(){
 
     base.forEach(pillar=>{
 
-        let total = 0;
-        let count = 0;
+        let total=0;
+        let count=0;
 
-        completedProcesses.forEach(pid=>{
+        dma.completedProcesses.forEach(pid=>{
 
-            const answers = allAnswers[pid];
+            const answers = dma.allAnswers[pid];
             const keys = pillars[pid][pillar] || [];
 
             if(!keys.length) return;
@@ -258,24 +268,24 @@ function buildAveragePillars(){
                 if(ans.toLowerCase && ans.toLowerCase()=="yes") pos++;
                 else if(!isNaN(ans)) pos++;
                 else pos+=0.5;
-            })
+            });
 
-            const score = Math.round((pos/keys.length)*5);
+            const score=Math.round((pos/keys.length)*5);
 
             total+=score;
             count++;
 
-        })
+        });
 
         table.push({
             pillar,
             average: count ? (total/count).toFixed(2) : 0
-        })
+        });
 
-    })
+    });
 
     return table;
-
 }
+
 
 module.exports = router;
