@@ -5,27 +5,76 @@
     <style>
         body { font-family: Arial; padding:20px; }
         h1 { text-align:center; }
-        table { width:100%; border-collapse:collapse; margin-top:20px; }
+        h2 { margin-top:30px; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
         th, td { border:1px solid #ccc; padding:10px; text-align:center; }
         th { background:#f2f2f2; }
-        a.button { display:inline-block; padding:10px 20px; background:green; color:white; text-decoration:none; border-radius:5px; }
+        a.button {
+            display:inline-block;
+            padding:8px 15px;
+            background:green;
+            color:white;
+            text-decoration:none;
+            border-radius:5px;
+        }
+        .completed { color:green; font-weight:bold; }
+        .pending { color:orange; font-weight:bold; }
     </style>
 </head>
 <body>
+
 <h1>DMA Dashboard</h1>
-<p>Welcome, {{user}}! <a href="/logout">Logout</a></p>
+<p>Welcome, {{user}} | <a href="/logout">Logout</a></p>
 
-<a class="button" href="/dashboard/process/1">Start/Continue DMA Questionnaire</a>
+<!-- ================= WAFER MANUFACTURING DMA ================= -->
+<h2>Wafer Manufacturing DMA</h2>
 
-<h2>Process Status</h2>
+<a class="button" href="/dashboard/process/1">Start / Continue</a>
+
 <table>
-<tr><th>Process</th><th>Status</th></tr>
-{{#each processes}}
-<tr>
-    <td>{{this.name}}</td>
-    <td>{{#if (includes ../completedProcesses this.id)}}Completed{{else}}Pending{{/if}}</td>
-</tr>
-{{/each}}
+    <tr>
+        <th>Process</th>
+        <th>Status</th>
+    </tr>
+    {{#each manufacturingProcesses}}
+    <tr>
+        <td>{{this.name}}</td>
+        <td>
+            {{#if (includes ../manufacturingCompleted this.id)}}
+                <span class="completed">✔ Completed</span>
+            {{else}}
+                <span class="pending">Pending</span>
+            {{/if}}
+        </td>
+    </tr>
+    {{/each}}
 </table>
+
+<!-- ================= PACKING BOX DMA ================= -->
+<h2>Packing Box DMA (Packmax)</h2>
+
+<a class="button" href="/dashboard/packing/process/packing_1">
+    Start / Continue
+</a>
+
+<table>
+    <tr>
+        <th>Process</th>
+        <th>Status</th>
+    </tr>
+    {{#each packingProcesses}}
+    <tr>
+        <td>{{this.name}}</td>
+        <td>
+            {{#if (includes ../packingCompleted this.id)}}
+                <span class="completed">✔ Completed</span>
+            {{else}}
+                <span class="pending">Pending</span>
+            {{/if}}
+        </td>
+    </tr>
+    {{/each}}
+</table>
+
 </body>
 </html>

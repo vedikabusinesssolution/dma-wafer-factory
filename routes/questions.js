@@ -109,5 +109,55 @@ module.exports = {
     { q: "Quality results logged digitally?", type: "dropdown", options: ["Yes","No"], key: "quality_logged" },
     { q: "Maintenance logs stored in", type: "dropdown", options: ["Paper","Excel","App","Dashboard"], key: "maint_logs" },
     { q: "Any unused data observed?", type: "text", key: "unused_data" }
+  ],
+
+  /* =========================
+     PACKING BOX DMA (PACKMAX)
+  ==========================*/
+
+  packing_1: [
+    { key: "box_design_cad", q: "Is box design created using CAD software?", type: "yesno" },
+    { key: "design_standard", q: "Are design standards documented?", type: "yesno" },
+    { key: "design_revision_control", q: "Is design revision history maintained?", type: "yesno" },
+    { key: "customer_spec_validation", q: "Are customer specifications validated before design finalization?", type: "yesno" },
+    { key: "material_optimization", q: "Is material usage optimized during design?", type: "yesno" },
+    { key: "design_approval_process", q: "Is there a formal design approval workflow?", type: "yesno" },
+    { key: "design_simulation", q: "Is box strength or performance simulated digitally?", type: "yesno" }
+  ],
+
+  packing_2: [
+    { key: "approved_vendors", q: "Are raw material vendors pre-approved?", type: "yesno" },
+    { key: "incoming_material_qc", q: "Is incoming board quality checked?", type: "yesno" },
+    { key: "gsm_verification", q: "Is GSM/thickness verified before production?", type: "yesno" },
+    { key: "cutting_auto", q: "Is board cutting automated?", type: "yesno" },
+    { key: "cutting_accuracy", q: "Is cutting accuracy measured regularly?", type: "yesno" },
+    { key: "cutting_rejection_tracking", q: "Are cutting rejections tracked digitally?", type: "yesno" },
+    { key: "waste_monitoring", q: "Is cutting-stage waste monitored?", type: "yesno" }
+  ],
+
+  packing_3: [
+    { key: "print_qc", q: "Is print quality checked digitally?", type: "yesno" },
+    { key: "brand_color_control", q: "Is brand color consistency controlled?", type: "yesno" },
+    { key: "print_registration_check", q: "Is print registration accuracy checked?", type: "yesno" },
+    { key: "ink_usage_tracking", q: "Is ink consumption tracked?", type: "yesno" },
+    { key: "print_defect_logging", q: "Are printing defects logged?", type: "yesno" },
+    { key: "print_machine_calibration", q: "Are printing machines calibrated regularly?", type: "yesno" },
+    { key: "proof_approval", q: "Is customer proof approval taken before bulk printing?", type: "yesno" }
+  ],
+
+  packing_4: [
+    { key: "die_auto", q: "Is die cutting automated?", type: "yesno" },
+    { key: "die_condition_check", q: "Is die condition inspected regularly?", type: "yesno" },
+    { key: "fold_accuracy", q: "Is folding accuracy measured?", type: "yesno" },
+    { key: "crease_quality", q: "Is crease quality checked to avoid cracking?", type: "yesno" },
+    { key: "setup_time_reduction", q: "Is setup time optimized during die changeover?", type: "yesno" },
+    { key: "inprocess_qc", q: "Is in-process quality inspection performed?", type: "yesno" }
+  ],
+  packing_5: [
+    { key: "final_qc", q: "Is final box inspection standardized?", type: "yesno" },
+    { key: "aql_followed", q: "Is AQL or sampling standard followed?", type: "yesno" },
+    { key: "barcode_labeling", q: "Are boxes labeled with barcode/QR code?", type: "yesno" },
+    { key: "dispatch_tracking", q: "Is dispatch digitally tracked?", type: "yesno" },
+    { key: "customer_complaint_tracking", q: "Are customer complaints tracked and analyzed?", type: "yesno" }
   ]
 };

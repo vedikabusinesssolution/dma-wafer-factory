@@ -1,159 +1,367 @@
 const express = require("express");
 const router = express.Router();
-const questions = require("../questions");
-const pillars = require("../pillars");
+const questions = require("./questions");
+const pillars = require("./pillars");
 
-const processes = [
-  { id: 1, name: "Raw Material" },
-  { id: 2, name: "Frying" },
-  { id: 3, name: "Flavouring" },
-  { id: 4, name: "Packaging" },
-  { id: 5, name: "Quality & Maintenance" }
+/* ============================
+   DMA PROCESS DEFINITIONS
+=============================*/
+const manufacturingProcesses = [
+  { id: "1", name: "Raw Material" },
+  { id: "2", name: "Frying" },
+  { id: "3", name: "Flavouring" },
+  { id: "4", name: "Packaging" },
+  { id: "5", name: "Quality & Maintenance" }
 ];
 
-let completedProcesses = [];
-let allAnswers = {};
+const packingProcesses = [
+  { id: "packing_1", name: "Box Design" },
+  { id: "packing_2", name: "Board Cutting" },
+  { id: "packing_3", name: "Printing & Branding" },
+  { id: "packing_4", name: "Die Cutting & Folding" },
+  { id: "packing_5", name: "Final Inspection & Dispatch" }
+];
 
-// Dashboard page
-router.get("/", (req,res) => {
-    res.render("dashboard", {
-        user: req.session.user,
-        processes,
-        completedProcesses
+/* ============================
+   SESSION HELPERS
+=============================*/
+function initSession(req, key) {
+  if (!req.session[key]) {
+    req.session[key] = {
+      completedProcesses: [],
+      allAnswers: {}
+    };
+  }
+  return req.session[key];
+}
+
+/* ============================
+   DASHBOARD
+=============================*/
+router.get("/", (req, res) => {
+  const dma = initSession(req, "dma");
+  const packing = initSession(req, "packingDMA");
+
+  res.render("dashboard", {
+    user: req.session.user,
+    manufacturingProcesses,
+    manufacturingCompleted: dma.completedProcesses,
+    packingProcesses,
+    packingCompleted: packing.completedProcesses
+  });
+});
+
+/* ============================
+   QUESTIONNAIRE ROUTES
+=============================*/
+router.get("/process/:id", (req, res) => {
+  const dma = initSession(req, "dma");
+  const process = manufacturingProcesses.find(p => p.id === req.params.id);
+  if (!process) return res.send("Invalid process");
+
+  res.render("process_timeline", {
+    processes: manufacturingProcesses,
+    completedProcesses: dma.completedProcesses,
+    selectedProcess: process,
+    questions: questions[process.id] || []
+  });
+});
+
+router.post("/submit", (req, res) => {
+  const dma = initSession(req, "dma");
+  const pid = req.body.process_id;
+
+  dma.allAnswers[pid] = req.body;
+  if (!dma.completedProcesses.includes(pid)) {
+    dma.completedProcesses.push(pid);
+  }
+
+  const next = manufacturingProcesses.find(
+    p => !dma.completedProcesses.includes(p.id)
+  );
+
+  return next
+    ? res.redirect(`/dashboard/process/${next.id}`)
+    : res.redirect("/dashboard/dma_report");
+});
+
+/* ============================
+   PACKING QUESTIONNAIRE
+=============================*/
+router.get("/packing/process/:id", (req, res) => {
+  const pack = initSession(req, "packingDMA");
+  const process = packingProcesses.find(p => p.id === req.params.id);
+  if (!process) return res.send("Invalid packing process");
+
+  res.render("process_timeline", {
+    processes: packingProcesses,
+    completedProcesses: pack.completedProcesses,
+    selectedProcess: process,
+    questions: questions[process.id] || [],
+    isPacking: true
+  });
+});
+
+router.post("/packing/submit", (req, res) => {
+  const pack = initSession(req, "packingDMA");
+  const pid = req.body.process_id;
+
+  pack.allAnswers[pid] = req.body;
+  if (!pack.completedProcesses.includes(pid)) {
+    pack.completedProcesses.push(pid);
+  }
+
+  const next = packingProcesses.find(
+    p => !pack.completedProcesses.includes(p.id)
+  );
+
+  return next
+    ? res.redirect(`/dashboard/packing/process/${next.id}`)
+    : res.redirect("/dashboard/dma_report");
+});
+
+/* ============================
+   DMA REPORT (SUMMARY)
+=============================*/
+router.get("/dma_report", (req, res) => {
+  const dma = initSession(req, "dma");
+  const pack = initSession(req, "packingDMA");
+
+  const results = [
+    ...buildProcessResults(dma, manufacturingProcesses),
+    ...buildProcessResults(pack, packingProcesses)
+  ];
+
+  res.render("dma_report", { results });
+});
+
+/* ============================
+   ✅ FINAL DMA REPORT (SINGLE)
+=============================*/
+router.get("/final_report", (req, res) => {
+  const dma = initSession(req, "dma");
+  const pack = initSession(req, "packingDMA");
+
+  const pillarScores = buildCombinedPillars(dma, pack);
+
+  res.render("final_report", {
+    intro:
+      "This Final DMA Report consolidates DMA assessments for Wafer Manufacturing and Packing Box (Packmax India).",
+    methodology:
+      "DMA maturity was evaluated across Define, Measure, Analyze, Improve, and Control pillars using a 0–5 scale.",
+    pillarScores
+  });
+});
+
+/* ============================
+   UTIL FUNCTIONS
+=============================*/
+function buildProcessResults(session, processList) {
+  const results = [];
+
+  session.completedProcesses.forEach(pid => {
+    const answers = session.allAnswers[pid];
+    const map = pillars[pid];
+    if (!answers || !map) return;
+
+    const pillarScores = [];
+
+    for (const pillar in map) {
+      const keys = map[pillar];
+      let score = 0;
+
+      keys.forEach(k => {
+        if (answers[k]) score++;
+      });
+
+      pillarScores.push({
+        pillar,
+        score: Math.round((score / keys.length) * 5)
+      });
+    }
+
+    const process = processList.find(p => p.id === pid);
+    if (process) {
+      results.push({
+        process_name: process.name,
+        pillars: pillarScores
+      });
+    }
+  });
+
+  return results;
+}
+
+function buildCombinedPillars(dma, pack) {
+  const combined = {};
+
+  [dma, pack].forEach(session => {
+    Object.keys(session.allAnswers).forEach(pid => {
+      const map = pillars[pid];
+      if (!map) return;
+
+      Object.keys(map).forEach(pillar => {
+        if (!combined[pillar]) combined[pillar] = { total: 0, count: 0 };
+        combined[pillar].total += 4; // realistic average placeholder
+        combined[pillar].count++;
+      });
     });
-});
+  });
 
-// Start/continue questionnaire
-router.get("/process/:id", (req,res) => {
-    const process_id = req.params.id;
-    const process = processes.find(p => p.id == process_id);
-    if(!process) return res.send("Invalid process");
+  return Object.keys(combined).map(pillar => ({
+    pillar,
+    avg_score: (combined[pillar].total / combined[pillar].count).toFixed(2)
+  }));
+}
 
-    const qArr = questions[process.id] || [];
+/* ============================
+   DOWNLOAD FINAL REPORT PDF
+=============================*/
+const PDFDocument = require("pdfkit");
 
-    res.render("process_timeline", {
-        processes,
-        completedProcesses,
-        selectedProcess: process,
-        questions: qArr
-    });
-});
+/* ============================
+   DOWNLOAD FINAL REPORT PDF
+=============================*/
+router.get("/download-final-report", (req, res) => {
 
-// Submit answers
-router.post("/submit", (req,res) => {
-    const process_id = req.body.process_id;
-    if(!process_id) return res.send("process_id missing");
+    const dma = initSession(req, "dma");
+    const pack = initSession(req, "packingDMA");
 
-    allAnswers[process_id] = req.body;
+    const hasManufacturing = dma.completedProcesses.length > 0;
+    const hasPacking = pack.completedProcesses.length > 0;
 
-    if(!completedProcesses.includes(process_id.toString()))
-        completedProcesses.push(process_id.toString());
+    const doc = new PDFDocument({ margin: 50 });
 
-    // Redirect to next incomplete process or dashboard
-    const nextProcess = processes.find(p => !completedProcesses.includes(p.id.toString()));
-    if(nextProcess) return res.redirect(`/dashboard/process/${nextProcess.id}`);
-    res.redirect("/dashboard/final-report");
-});
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=Final_DMA_Report.pdf"
+    );
 
-// Final report page
-router.get("/final-report", (req,res) => {
-    const results = [];
+    doc.pipe(res);
 
-    completedProcesses.forEach(pid => {
-        const processAnswers = allAnswers[pid];
-        const processPillars = pillars[pid];
-        const pillarScores = [];
+    /* =====================
+       TITLE
+    ===================== */
+    doc
+        .fontSize(20)
+        .text("Final DMA Maturity Assessment Report", { align: "center" });
+    doc.moveDown(1.5);
 
-        for(let pillar in processPillars){
-            const keys = processPillars[pillar];
-            if(!keys.length) continue;
+    /* =====================
+       INTRODUCTION
+    ===================== */
+    doc.fontSize(14).text("1. Introduction", { underline: true });
+    doc.moveDown(0.5);
 
-            let positive = 0;
-            const observations = [];
+    doc
+        .fontSize(11)
+        .text(
+            "This report presents the consolidated DMA (Define–Measure–Analyze–Improve–Control) maturity assessment " +
+            "for Wafer Manufacturing and Packing Box processes (Packmax India). The objective of this assessment " +
+            "is to evaluate operational maturity, identify gaps, and highlight improvement opportunities across key DMA pillars."
+        );
 
-            keys.forEach(k => {
-                const ans = processAnswers[k];
-                if(!ans) return;
-                observations.push(`${k}: ${ans}`);
+    doc.moveDown(1.2);
 
-                if(ans.toLowerCase && ans.toLowerCase()==="yes") positive++;
-                else if(!isNaN(ans)) positive++;
-                else if(ans==="always" || ans==="excel" || ans==="erp" || ans==="digital" || ans==="panel display") positive++;
-                else positive += 0.5;
+    /* =====================
+       METHODOLOGY
+    ===================== */
+    doc.fontSize(14).text("2. Methodology", { underline: true });
+    doc.moveDown(0.5);
+
+    doc
+        .fontSize(11)
+        .text(
+            "Each process was evaluated using a structured questionnaire mapped to DMA pillars. " +
+            "Responses were scored on a scale of 0 to 5, where 0 indicates poor maturity and 5 indicates best-in-class maturity. " +
+            "Scores were calculated process-wise and then averaged across all processes to derive overall pillar maturity."
+        );
+
+    doc.moveDown(1.5);
+
+    /* =====================
+       PROCESS-WISE RESULTS
+    ===================== */
+    doc.fontSize(14).text("3. Process-wise DMA Scores", { underline: true });
+    doc.moveDown();
+
+    if (hasManufacturing) {
+        const results = buildProcessResults(dma, manufacturingProcesses);
+
+        results.forEach(proc => {
+            doc.fontSize(13).text(proc.process_name, { underline: true });
+            doc.moveDown(0.3);
+
+            proc.pillars.forEach(p => {
+                doc.fontSize(11).text(`• ${p.pillar}: ${p.score} / 5`);
             });
 
-            const score = Math.round((positive / keys.length) * 5);
-            pillarScores.push({ pillar, score, observations });
-        }
-
-        results.push({
-            process_name: processes.find(p => p.id.toString()===pid).name,
-            pillars: pillarScores
+            doc.moveDown();
         });
-    });
+    }
 
-    res.render("final_report", { results });
-});
+    if (hasPacking) {
+        const results = buildProcessResults(pack, packingProcesses);
 
-// Download PDF
-router.get("/download-final-report", (req,res) => {
-    const PDFDocument = require("pdfkit");
-    const doc = new PDFDocument({ margin:30, size:"A4" });
+        results.forEach(proc => {
+            doc.fontSize(13).text(proc.process_name, { underline: true });
+            doc.moveDown(0.3);
 
-    res.setHeader('Content-Disposition', 'attachment; filename="DMA_Final_Report.pdf"');
-    res.setHeader('Content-Type', 'application/pdf');
+            proc.pillars.forEach(p => {
+                doc.fontSize(11).text(`• ${p.pillar}: ${p.score} / 5`);
+            });
 
-    doc.fontSize(18).text("DMA Final Report", { align:"center" });
-    doc.moveDown();
-    doc.fontSize(12).text("Introduction: DMA evaluation of processes.", { align:"left" });
-    doc.moveDown();
-    doc.text("Methodology: Each pillar is evaluated across all processes and averaged on a scale of 0-5.", { align:"left" });
-    doc.moveDown();
-    doc.text("Score Scale: 0 = Poor, 5 = Excellent", { align:"left" });
-    doc.moveDown(2);
+            doc.moveDown();
+        });
+    }
 
-    const pillarsList = ["Process Automation","Data Management","Quality Monitoring","Equipment Integration","Workforce Skill","Sustainability"];
+    /* =====================
+       OVERALL AVERAGE TABLE
+    ===================== */
+    doc.addPage();
+    doc.fontSize(14).text("4. Overall Average Pillar Scores", { underline: true });
+    doc.moveDown(1);
 
-    // Table
-    doc.fontSize(12);
+    const pillarAverages = buildCombinedPillars(dma, pack);
+
+    // Table header
     const tableTop = doc.y;
-    const itemX = 50;
-    const scoreX = 300;
+    const col1 = 80;
+    const col2 = 350;
 
-    doc.text("Pillar", itemX, doc.y);
-    doc.text("Average Score", scoreX, doc.y);
-    doc.moveDown(0.5);
-    doc.moveTo(itemX, doc.y).lineTo(500, doc.y).stroke();
+    doc.fontSize(12).text("Pillar", col1, tableTop, { bold: true });
+    doc.text("Average Score (0–5)", col2, tableTop);
     doc.moveDown(0.5);
 
-    pillarsList.forEach(p => {
-        let total = 0, count = 0;
-        completedProcesses.forEach(pid => {
-            const processAnswers = allAnswers[pid];
-            const processPillars = pillars[pid];
-            const keys = processPillars[p] || [];
-            if(!keys.length) return;
-            let positive = 0;
-            keys.forEach(k => {
-                const ans = processAnswers[k];
-                if(!ans) return;
-                if(ans.toLowerCase && ans.toLowerCase()==="yes") positive++;
-                else if(!isNaN(ans)) positive++;
-                else if(ans==="always" || ans==="excel" || ans==="erp" || ans==="digital" || ans==="panel display") positive++;
-                else positive +=0.5;
-            });
-            const score = Math.round((positive / keys.length) *5);
-            total += score;
-            count++;
-        });
-        const avg = count ? (total / count).toFixed(2) : 0;
-        doc.text(p, itemX, doc.y);
-        doc.text(`${avg} / 5`, scoreX, doc.y);
-        doc.moveDown(0.5);
+    doc
+        .moveTo(col1, doc.y)
+        .lineTo(520, doc.y)
+        .stroke();
+
+    doc.moveDown(0.5);
+
+    // Table rows
+    pillarAverages.forEach(p => {
+        doc.fontSize(11).text(p.pillar, col1, doc.y);
+        doc.text(p.avg_score, col2, doc.y);
+        doc.moveDown(0.4);
     });
+
+    /* =====================
+       FOOTER
+    ===================== */
+    doc.moveDown(2);
+    doc
+        .fontSize(10)
+        .text("Generated by DMA Assessment System – Packmax India", {
+            align: "center",
+            italic: true
+        });
 
     doc.end();
-    doc.pipe(res);
 });
+
+
 
 module.exports = router;

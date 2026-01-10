@@ -44,5 +44,53 @@ module.exports = {
     "Equipment Integration": ["machine_issue","issue_desc","downtime","fixed_by"],
     "Workforce Skill": [],
     "Sustainability": ["pm_location","unused_data"]
+  },
+
+  /* =========================
+     PACKING BOX DMA
+  ==========================*/
+
+  packing_1: {
+    "Process Automation": ["box_design_cad"],
+    "Data Management": ["design_standard"],
+    "Quality Monitoring": [],
+    "Equipment Integration": [],
+    "Workforce Skill": [],
+    "Sustainability": []
+  },
+  packing_2: {
+    "Process Automation": ["cutting_auto"],
+    "Quality Monitoring": ["cutting_accuracy"],
+    "Data Management": [],
+    "Equipment Integration": [],
+    "Workforce Skill": [],
+    "Sustainability": []
+  },
+
+  packing_3: {
+    "Quality Monitoring": ["print_qc", "brand_color_control"],
+    "Process Automation": [],
+    "Data Management": [],
+    "Equipment Integration": [],
+    "Workforce Skill": [],
+    "Sustainability": []
+  },
+  packing_4: {
+    "Process Automation": ["die_auto"],
+    "Quality Monitoring": ["fold_accuracy"],
+    "Data Management": [],
+    "Equipment Integration": [],
+    "Workforce Skill": [],
+    "Sustainability": []
+  },
+
+  packing_5: {
+    "Quality Monitoring": ["final_qc"],
+    "Data Management": ["dispatch_tracking"],
+    "Process Automation": [],
+    "Equipment Integration": [],
+    "Workforce Skill": [],
+    "Sustainability": []
   }
+
 };
