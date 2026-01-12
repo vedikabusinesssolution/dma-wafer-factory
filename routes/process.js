@@ -232,11 +232,11 @@ router.get("/", (req,res) => {
         user: req.session.user,
         processes,
         completedProcesses: dma.completedProcesses   // ✅ ONLY session data
->>>>>>> 5d98baba36555e1208b4d7194be834d657e81b1b
+
     });
   });
 
-<<<<<<< HEAD
+
   return Object.keys(combined).map(pillar => ({
     pillar,
     avg_score: (combined[pillar].total / combined[pillar].count).toFixed(2)
@@ -375,7 +375,7 @@ router.get("/download-final-report", (req, res) => {
         doc.fontSize(11).text(p.pillar, col1, doc.y);
         doc.text(p.avg_score, col2, doc.y);
         doc.moveDown(0.4);
-=======
+
 
 
 /* ============================
@@ -527,8 +527,7 @@ router.get("/download-final-report",(req,res)=>{
 
 
 
-<<<<<<< HEAD
-=======
+
 
 
 
@@ -638,5 +637,5 @@ function buildAveragePillars(dma){
 }
 
 
->>>>>>> 5d98baba36555e1208b4d7194be834d657e81b1b
+
 module.exports = router;
