@@ -15,7 +15,6 @@ const manufacturingProcesses = [
   { id: "5", name: "Quality & Maintenance" }
 ];
 
-<<<<<<< HEAD
 const packingProcesses = [
   { id: "packing_1", name: "Box Design" },
   { id: "packing_2", name: "Board Cutting" },
