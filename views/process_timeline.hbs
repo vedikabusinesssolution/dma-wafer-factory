@@ -107,9 +107,13 @@
 <div class="question-container">
     <h2>{{selectedProcess.name}} Questionnaire</h2>
 
+<<<<<<< HEAD
     <form action="{{#if isPacking}}/dashboard/packing/submit{{else}}/dashboard/submit{{/if}}" method="POST">
 
 
+=======
+    <form action="/dashboard/submit" method="POST">
+>>>>>>> 5d98baba36555e1208b4d7194be834d657e81b1b
         <input type="hidden" name="process_id" value="{{selectedProcess.id}}">
 
         {{#each questions}}
