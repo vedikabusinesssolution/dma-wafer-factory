@@ -508,7 +508,7 @@ router.get("/download-final-report",(req,res)=>{
 
     averages.forEach(row=>{
         doc.text(`${row.pillar} :  ${row.average} / 5`);
->>>>>>> 5d98baba36555e1208b4d7194be834d657e81b1b
+
     });
 
     /* =====================
