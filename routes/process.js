@@ -241,7 +241,7 @@ router.get("/", (req,res) => {
     pillar,
     avg_score: (combined[pillar].total / combined[pillar].count).toFixed(2)
   }));
-}
+
 
 /* ============================
    DOWNLOAD FINAL REPORT PDF
