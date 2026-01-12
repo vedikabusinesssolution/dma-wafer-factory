@@ -2,10 +2,7 @@ const express = require("express");
 const router = express.Router();
 const questions = require("./questions");
 const pillars = require("./pillars");
-<<<<<<< HEAD
-=======
 const PDFDocument = require("pdfkit");
->>>>>>> 5d98baba36555e1208b4d7194be834d657e81b1b
 
 /* ============================
    DMA PROCESS DEFINITIONS
