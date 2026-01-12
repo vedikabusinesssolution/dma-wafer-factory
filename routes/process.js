@@ -206,7 +206,7 @@ function buildCombinedPillars(dma, pack) {
         combined[pillar].total += 4; // realistic average placeholder
         combined[pillar].count++;
       });
-=======
+
 /* ============================
    SESSION STORE
 =============================*/
